@@ -29,10 +29,10 @@ def sign(x):
 
 
 class Card:
-    def __init__(self, suit, rank, chute=None):
+    def __init__(self, suit, rank, deck=None):
         self._suit = suit
         self._rank = rank
-        self._chute = chute
+        self._deck = deck
         self._hidden = False
         self._position = None
         self._target = None
@@ -44,13 +44,13 @@ class Card:
         return f"{self.rank} of {self.suit}"
 
     def __gt__(self, other_card):
-        self.deck.compare(self, other_card, 1)
+        self._deck.compare(self, other_card, 1)
 
     def __lt__(self, other_card):
-        self.deck.compare(self, other_card, -1)
+        self._deck.compare(self, other_card, -1)
 
     def __eq__(self, other_card):
-        self.deck.compare(self, other_card, 0)
+        self._deck.compare(self, other_card, 0)
 
     def __hash__(self):
         return hash((self.suit, self.rank))
@@ -94,15 +94,15 @@ class Card:
         self.hidden = not self.hidden
 
     def discard(self):
-        self._chute.discard(self)
+        self._deck.discard(self)
 
     def erase(self):
-        self._chute.erase(self._target, self.position[0], self.position[1])
+        self._deck.erase(self._target, self.position[0], self.position[1])
 
     def hit_test(self, x, y):
         if self.position is None:
             return False
-        return self.position[0] <= x < self.position[0] + self._chute.width and self.position[1] <= y < self.position[1] + self._chute.height
+        return self.position[0] <= x < self.position[0] + self._deck.width and self.position[1] <= y < self.position[1] + self._deck.height
 
     @property
     def position(self):
@@ -113,7 +113,7 @@ class Card:
         self._position = value
 
     def render(self, target, x, y, hidden=True):
-        self._chute.render(self, target, x, y, hidden=hidden)
+        self._deck.render(self, target, x, y, hidden=hidden)
 
     def set_state(self, target, x, y, hidden):
         self._target = target
@@ -175,6 +175,7 @@ class Hand(Pile):
         for card in self._in_pile:
             card.reveal()
 
+
 class Cards(Pile):
 
     _positions = {
@@ -224,7 +225,7 @@ class Cards(Pile):
         }
 
         self._all_cards = set(Card(suit, rank, self) for suit in self._suits for rank in self._ranks for _ in range(num_decks))
-        self._in_chute = set()
+        self._in_deck = set()
         self._in_play = set()
         self._in_discard = set()
         self.shuffle()
@@ -270,8 +271,8 @@ class Cards(Pile):
         return self._stack_offset_y
 
     @property
-    def in_chute(self):
-        return list(self._in_chute)
+    def in_deck(self):
+        return list(self._in_deck)
     
     @property
     def in_play(self):
@@ -286,11 +287,11 @@ class Cards(Pile):
         return list(self._all_cards)
 
     def __len__(self):
-        return len(self._in_chute)
+        return len(self._in_deck)
 
     def shuffle(self):
         # Move all cards back into the deck
-        self._in_chute = set(card for card in self._all_cards)
+        self._in_deck = set(card for card in self._all_cards)
         self._in_play.clear()
         self._in_discard.clear()
     
@@ -299,13 +300,13 @@ class Cards(Pile):
         self._in_discard.add(card)
 
     def draw_one(self):
-        if self._in_chute:
-            card = random.choice(list(self._in_chute))
-            self._in_chute.remove(card)
+        if self._in_deck:
+            card = random.choice(list(self._in_deck))
+            self._in_deck.remove(card)
             self._in_play.add(card)
             return card
         else:
-            raise ValueError("No cards left in the chute")
+            raise ValueError("No cards left in the deck")
 
     def draw(self, quantity=1):
         return [self.draw_one() for _ in range(quantity)]
@@ -401,7 +402,7 @@ class Cards(Pile):
                 suit2_score = 4 - self._cmp_suit_order.index(card1.suit)
             if (suit_comparison := sign(suit1_score - suit2_score)) != 0:
                 return suit_comparison == comparison
-        return sign(self._rank_order.index(card1.rank) - self._rank_order.index(card2.rank)) == comparison
+        return sign(self._cmp_rank_order.index(card1.rank) - self._cmp_rank_order.index(card2.rank)) == comparison
 
     def clear_table(self):
         for card in self._in_play:
