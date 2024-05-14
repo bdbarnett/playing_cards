@@ -1,0 +1,8 @@
+{
+    "urls": [
+      ["lib/playing_cards.py", "github:bdbarnett/playing_cards/playing_cards.py"],
+      ["examples/playing_cards_simpletest.py", "github:bdbarnett/playing_cards/examples/playing_cards_simpletest.py"],
+      ["examples/blackjack.py", "github:bdbarnett/playing_cards/examples/blackjack.py"]
+    ],
+    "version": "0.1"
+  }
