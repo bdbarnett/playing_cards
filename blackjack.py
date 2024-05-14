@@ -118,6 +118,7 @@ class Game(Cards):
                     self.player1.place(self.draw_one())
                     self.show()
                     if self.calculate_hand_value(self.player1.in_pile) > 21:
+                        self.dealer.reveal()
                         text = "Player busts! Dealer wins."
                         self._target.btext(text, (self._target.width - self._target.bfont_width * len(text)) // 2, self._target.height // 2, self._pallette.RED)
                         return
