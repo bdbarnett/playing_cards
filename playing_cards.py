@@ -17,10 +17,165 @@ SUITS = [HEARTS, DIAMONDS, CLUBS, SPADES]
 
 ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING = \
     "Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"
-NAMES = [ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING]
+RANKS = [ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING]
 
 
-class Cards:
+def sign(x):
+	if x < 0:
+		return -1
+	if x > 0:
+		return 1
+	return 0
+
+
+class Card:
+    def __init__(self, suit, rank, chute=None):
+        self._suit = suit
+        self._rank = rank
+        self._chute = chute
+        self._hidden = False
+        self._position = None
+        self._target = None
+
+    def __str__(self):
+        return f"{self.rank} of {self.suit}"
+
+    def __repr__(self):
+        return f"{self.rank} of {self.suit}"
+
+    def __gt__(self, other_card):
+        self.deck.compare(self, other_card, 1)
+
+    def __lt__(self, other_card):
+        self.deck.compare(self, other_card, -1)
+
+    def __eq__(self, other_card):
+        self.deck.compare(self, other_card, 0)
+
+    def __hash__(self):
+        return hash((self.suit, self.rank))
+
+    @property
+    def target(self):
+        return self._target
+    
+    @target.setter
+    def target(self, value):
+        self._target = value
+
+    @property
+    def value(self):
+        return self.rank if len(self.rank) < 3 else self.rank[0]
+
+    @property
+    def suit(self):
+        return self._suit
+    
+    @property
+    def rank(self):
+        return self._rank
+
+    @property
+    def hidden(self):
+        return self._hidden
+    
+    @hidden.setter
+    def hidden(self, value):
+        if self._hidden != value:
+            self.render(self._target, self.position[0], self.position[1], hidden=value)
+
+    def hide(self):
+        self.hidden = True
+
+    def reveal(self):
+        self.hidden = False
+
+    def flip(self):
+        self.hidden = not self.hidden
+
+    def discard(self):
+        self._chute.discard(self)
+
+    def erase(self):
+        self._chute.erase(self._target, self.position[0], self.position[1])
+
+    def hit_test(self, x, y):
+        if self.position is None:
+            return False
+        return self.position[0] <= x < self.position[0] + self._chute.width and self.position[1] <= y < self.position[1] + self._chute.height
+
+    @property
+    def position(self):
+        return self._position
+    
+    @position.setter
+    def position(self, value):
+        self._position = value
+
+    def render(self, target, x, y, hidden=True):
+        self._chute.render(self, target, x, y, hidden=hidden)
+
+    def set_state(self, target, x, y, hidden):
+        self._target = target
+        self._position = (x, y)
+        self._hidden = hidden
+
+
+class Pile():
+    def __init__(self, target, start_x=0, start_y=0, top_card_hidden=True, other_cards_hidden=True, layout_horizontal=True, layout_direction=0, layout_offset=0):
+        self._target = target
+        self._start_x = self._next_x = start_x
+        self._start_y = self._next_y = start_y
+        self._top_card_hidden = top_card_hidden
+        self._other_cards_hidden = other_cards_hidden
+        self._layout_horizontal = layout_horizontal  # True = horizontal, False = vertical
+        self._layout_direction = layout_direction  # +1 = left-to-right / top-to-bottom, -1 = right-to-left / bottom-to-top, 0 = no offset
+        self._layout_offset = layout_offset  # Amount of space to shift each card (stacking_offset_x, stacking_offset_y, Cards.width, Cards.height or 0)
+        self._in_pile = set()
+
+    def clear(self):  # Remove all cards from the pile
+        self._in_pile.clear()
+        self._next_x = self._start_x
+        self._next_y = self._start_y
+
+    def place(self, card, top_card=False):  # Place a card on the pile
+        self._in_pile.add(card)
+
+        if top_card:
+            hidden=self._top_card_hidden
+        else:
+            hidden=self._other_cards_hidden
+
+        card.render(self._target, self._next_x, self._next_y, hidden=hidden)
+        if self._layout_horizontal == True:
+            self._next_x += self._layout_direction * self._layout_offset
+        else:
+            self._next_y += self._layout_direction * self._layout_offset
+
+    def pull(self, card):  # Remove a card from the pile
+         pass
+    
+    def shuffle(self):  # Shuffle the pile
+        pass
+
+    def sort(self):  # Sort the pile
+        pass
+
+    @property
+    def in_pile(self):
+        return list(self._in_pile)
+
+
+class Hand(Pile):
+    def __init__(self, is_dealer=False, **kwargs):
+        self._is_dealer = is_dealer
+        super().__init__(**kwargs)
+
+    def reveal(self):
+        for card in self._in_pile:
+            card.reveal()
+
+class Cards(Pile):
 
     _positions = {
         "Ace": [(2, 3)],
@@ -45,13 +200,18 @@ class Cards:
         SPADES: chr(0x06),  # '♠'
     }
 
-    def __init__(self, width, height, pallette, num_decks=1, table_color=None, suits=SUITS, names=NAMES):
+    _cmp_colors_must_match = False
+    _cmp_suits_must_match = False
+    _cmp_rank_order = [ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING]
+    _cmp_suit_order = []  # if empty, all are equal; if len()=1, that suit is trump; if len()=4, they are ordered
+
+    def __init__(self, width, height, pallette, num_decks=1, table_color=None, suits=SUITS, ranks=RANKS):
         self.set_dimensions(width, height)
         self._pallette = pallette
         self._num_decks = num_decks
         self._table_color = table_color if table_color is not None else pallette.GREEN
         self._suits = suits
-        self._names = names
+        self._ranks = ranks
         self._back_color = pallette.BLUE
         self._border_color = pallette.BLACK
         self._bg_color = pallette.WHITE
@@ -63,7 +223,7 @@ class Cards:
             SPADES: pallette.BLACK,
         }
 
-        self._all_cards = set(Card(suit, name, self) for suit in self._suits for name in self._names for _ in range(num_decks))
+        self._all_cards = set(Card(suit, rank, self) for suit in self._suits for rank in self._ranks for _ in range(num_decks))
         self._in_chute = set()
         self._in_play = set()
         self._in_discard = set()
@@ -78,6 +238,7 @@ class Cards:
         self._fcs = 6  # Face card scale
         self._width = width  # Width of card including padding
         self._height = height  # Height of card including padding
+        self._is_small = height < 120
         self._stack_offset_x = width // 5  # Amount of space to leave between cards stacked horizontally
         self._stack_offset_y = height // 4  # Amount of space to leave between cards stacked vertically
         self._draw_width = width * 9 // 10  # Width of card excluding padding
@@ -207,8 +368,12 @@ class Cards:
             inverted=True,
         )
 
+        # Skip drawing the suit glyph if the cards are small
+        if self._is_small:
+            return
+
         # Draw the suit glyph on the grid (on Ace through 10)
-        for x_pos, y_pos in self._positions[card.name]:
+        for x_pos, y_pos in self._positions[card.rank]:
             target.btext(
                 self._suit_glyphs[card.suit],
                 draw_x + self._x_positions[x_pos] - self._lfs * self._lfw // 2,
@@ -219,7 +384,7 @@ class Cards:
             )
 
         # Draw a large letter on face cards instead of a graphic
-        if card.name in ["Jack", "Queen", "King"]:
+        if card.rank in ["Jack", "Queen", "King"]:
             target.btext(
                 card.value[0],
                 draw_x + self._x_positions[2] - self._fcs * self._lfw // 2,
@@ -228,82 +393,16 @@ class Cards:
                 scale=self._fcs,
             )
 
+    def compare(self, card1, card2, comparison=0):
+        if self._cmp_suit_order:
+            if suit1_score := self._cmp_suit_order.count(card1.suit):
+                suit1_score = 4 - self._cmp_suit_order.index(card1.suit)
+            if suit2_score := self._cmp_suit_order.count(card2.suit):
+                suit2_score = 4 - self._cmp_suit_order.index(card1.suit)
+            if (suit_comparison := sign(suit1_score - suit2_score)) != 0:
+                return suit_comparison == comparison
+        return sign(self._rank_order.index(card1.rank) - self._rank_order.index(card2.rank)) == comparison
 
-class Card:
-    def __init__(self, suit, name, chute):
-        self._suit = suit
-        self._name = name
-        self._chute = chute
-        self._hidden = False
-        self._position = None
-        self._target = None
-
-    def __str__(self):
-        return f"{self.name} of {self.suit}"
-
-    def __repr__(self):
-        return f"{self.name} of {self.suit}"
-
-    @property
-    def target(self):
-        return self._target
-    
-    @target.setter
-    def target(self, value):
-        self._target = value
-
-    @property
-    def value(self):
-        return self.name if len(self.name) < 3 else self.name[0]
-
-    @property
-    def suit(self):
-        return self._suit
-    
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def hidden(self):
-        return self._hidden
-    
-    @hidden.setter
-    def hidden(self, value):
-        self.render(self._target, self.position[0], self.position[1], hidden=value)
-
-    def hide(self):
-        self.hidden = True
-
-    def reveal(self):
-        self.hidden = False
-
-    def flip(self):
-        self.hidden = not self.hidden
-
-    def discard(self):
-        self._chute.discard(self)
-
-    def erase(self):
-        self._chute.erase(self._target, self.position[0], self.position[1])
-
-    def hit_test(self, x, y):
-        if self.position is None:
-            return False
-        return self.position[0] <= x < self.position[0] + self._chute.width and self.position[1] <= y < self.position[1] + self._chute.height
-
-    @property
-    def position(self):
-        return self._position
-    
-    @position.setter
-    def position(self, value):
-        self._position = value
-
-    def render(self, target, x, y, hidden=True):
-        self._chute.render(self, target, x, y, hidden=hidden)
-
-    def set_state(self, target, x, y, hidden):
-        self._target = target
-        self._position = (x, y)
-        self._hidden = hidden
+    def clear_table(self):
+        for card in self._in_play:
+            card.erase()

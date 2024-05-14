@@ -9,17 +9,17 @@ appropriate lines in the section below.
 """
 #############################################
 #
-# from displaybuf import DisplayBuffer as SSD
-# display = SSD(display_drv, SSD.RGB565)
-# color = display.color
-# show = display.show
+from displaybuf import DisplayBuffer as SSD
+display = SSD(display_drv, SSD.RGB565)
+color = display.color
+show = display.show
 #
 #############################################
 #
-from tft_graphics import Graphics
-display = Graphics(display_drv)
-color = display.color565
-show = lambda: None
+# from tft_graphics import Graphics
+# display = Graphics(display_drv)
+# color = display.color565
+# show = lambda: None
 #
 #############################################
 
