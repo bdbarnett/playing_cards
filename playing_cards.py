@@ -43,17 +43,17 @@ class Card:
     def __repr__(self):
         return f"{self.rank} of {self.suit}"
 
-    def __gt__(self, other_card):
-        self._deck.compare(self, other_card, 1)
+    # def __gt__(self, other_card):
+    #     self._deck.compare(self, other_card, 1)
 
-    def __lt__(self, other_card):
-        self._deck.compare(self, other_card, -1)
+    # def __lt__(self, other_card):
+    #     self._deck.compare(self, other_card, -1)
 
-    def __eq__(self, other_card):
-        self._deck.compare(self, other_card, 0)
+    # def __eq__(self, other_card):
+    #     self._deck.compare(self, other_card, 0)
 
-    def __hash__(self):
-        return hash((self.suit, self.rank))
+    # def __hash__(self):
+    #     return hash((self.suit, self.rank))
 
     @property
     def target(self):
@@ -131,7 +131,7 @@ class Pile():
         self._layout_horizontal = layout_horizontal  # True = horizontal, False = vertical
         self._layout_direction = layout_direction  # +1 = left-to-right / top-to-bottom, -1 = right-to-left / bottom-to-top, 0 = no offset
         self._layout_offset = layout_offset  # Amount of space to shift each card (stacking_offset_x, stacking_offset_y, Cards.width, Cards.height or 0)
-        self._in_pile = set()
+        self._in_pile = []
 
     def clear(self):  # Remove all cards from the pile
         self._in_pile.clear()
@@ -139,7 +139,7 @@ class Pile():
         self._next_y = self._start_y
 
     def place(self, card, top_card=False):  # Place a card on the pile
-        self._in_pile.add(card)
+        self._in_pile.append(card)
 
         if top_card:
             hidden=self._top_card_hidden
@@ -224,10 +224,10 @@ class Cards(Pile):
             SPADES: pallette.BLACK,
         }
 
-        self._all_cards = set(Card(suit, rank, self) for suit in self._suits for rank in self._ranks for _ in range(num_decks))
-        self._in_deck = set()
-        self._in_play = set()
-        self._in_discard = set()
+        self._all_cards = [Card(suit, rank, self) for suit in self._suits for rank in self._ranks for _ in range(num_decks)]
+        self._in_deck = []
+        self._in_play = []
+        self._in_discard = []
         self.shuffle()
 
     def set_dimensions(self, width, height):
@@ -272,38 +272,38 @@ class Cards(Pile):
 
     @property
     def in_deck(self):
-        return list(self._in_deck)
+        return self._in_deck
     
     @property
     def in_play(self):
-        return list(self._in_play)
+        return self._in_play
     
     @property
     def in_discard(self):
-        return list(self._in_discard)
+        return self._in_discard
     
     @property
     def all_cards(self):
-        return list(self._all_cards)
+        return self._all_cards
 
     def __len__(self):
         return len(self._in_deck)
 
     def shuffle(self):
         # Move all cards back into the deck
-        self._in_deck = set(card for card in self._all_cards)
+        self._in_deck = [card for card in self._all_cards]
         self._in_play.clear()
         self._in_discard.clear()
     
     def discard(self, card):
         self._in_play.remove(card)
-        self._in_discard.add(card)
+        self._in_discard.append(card)
 
     def draw_one(self):
         if self._in_deck:
-            card = random.choice(list(self._in_deck))
+            card = random.choice(self._in_deck)
             self._in_deck.remove(card)
-            self._in_play.add(card)
+            self._in_play.append(card)
             return card
         else:
             raise ValueError("No cards left in the deck")
