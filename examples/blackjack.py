@@ -7,7 +7,7 @@ import sys
 display_drv.rotation = 90
 
 """
-This demo is written to use either DisplayBuf or TFT_Graphics.  To switch between them, comment out the
+This demo is written to use either DisplayBuf or Direct Draw.  To switch between them, comment out the
 appropriate lines in the section below.
 """
 #############################################
@@ -19,7 +19,7 @@ show = display.show
 #
 #############################################
 #
-# from tft_graphics import Graphics
+# from direct_draw import Graphics
 # display = Graphics(display_drv)
 # color = display.color565
 # show = lambda: None
