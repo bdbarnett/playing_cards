@@ -1,31 +1,45 @@
-from playing_cards import Cards, Hand
+"""
+This demo is written to use either DisplayBuf or Direct Draw.  To switch between them, comment out one
+of the two import lines below.
+"""
+from displaybuf import DisplayBuffer as Renderer
+# from direct_draw import Graphics as Renderer
+
 from board_config import display_drv
 from mpdisplay import Events
-from playing_cards import Cards
+from playing_cards import Cards, Hand
 from time import sleep
-import sys
+
+
 display_drv.rotation = 90
+display = Renderer(display_drv)
 
-"""
-This demo is written to use either DisplayBuf or Direct Draw.  To switch between them, comment out the
-appropriate lines in the section below.
-"""
-#############################################
-#
-from displaybuf import DisplayBuffer as SSD
-display = SSD(display_drv, SSD.RGB565)
-color = display.color
-show = display.show
-#
-#############################################
-#
-# from direct_draw import Graphics
-# display = Graphics(display_drv)
-# color = display.color565
-# show = lambda: None
-#
-#####
 
+class Pallette:
+    def __init__(self, color_dict) -> None:
+        self._color_dict = color_dict
+        for name, color in color_dict.items():
+            setattr(self, name, color)
+
+
+pallette = Pallette({
+    "BLACK": display.color(0x00, 0x00, 0x00),
+    "BLUE": display.color(0x00, 0x00, 0xAA),
+    "GREEN": display.color(0x00, 0xAA, 0x00),
+    "CYAN": display.color(0x00, 0xAA, 0xAA),
+    "RED": display.color(0xAA, 0x00, 0x00),
+    "MAGENTA": display.color(0xAA, 0x00, 0xAA),
+    "BROWN": display.color(0xAA, 0x55, 0x00),
+    "LIGHTGRAY": display.color(0xAA, 0xAA, 0xAA),
+    "DARKGRAY": display.color(0x55, 0x55, 0x55),
+    "LIGHTGRAY": display.color(0x55, 0x55, 0xFF),
+    "LIGHTGREEN": display.color(0x55, 0xFF, 0x55),
+    "LIGHTCYAN": display.color(0x55, 0xFF, 0xFF),
+    "LIGHTRED": display.color(0xFF, 0x55, 0x55),
+    "LIGHTMAGENTA": display.color(0xFF, 0x55, 0xFF),
+    "YELLOW": display.color(0xFF, 0xFF, 0x55),
+    "WHITE": display.color(0xFF, 0xFF, 0xFF),
+})
 
 # fmt: off
 VALUES = { "Ace": 11, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "10": 10, "Jack": 10, "Queen": 10, "King": 10}
@@ -191,32 +205,6 @@ class Button:
         self._text = value
         self.draw()
 
-
-class Pallette:
-    def __init__(self, color_dict) -> None:
-        self._color_dict = color_dict
-        for name, color in color_dict.items():
-            setattr(self, name, color)
-
-
-pallette = Pallette({
-    "BLACK": color(0x00, 0x00, 0x00),
-    "BLUE": color(0x00, 0x00, 0xAA),
-    "GREEN": color(0x00, 0xAA, 0x00),
-    "CYAN": color(0x00, 0xAA, 0xAA),
-    "RED": color(0xAA, 0x00, 0x00),
-    "MAGENTA": color(0xAA, 0x00, 0xAA),
-    "BROWN": color(0xAA, 0x55, 0x00),
-    "LIGHTGRAY": color(0xAA, 0xAA, 0xAA),
-    "DARKGRAY": color(0x55, 0x55, 0x55),
-    "LIGHTGRAY": color(0x55, 0x55, 0xFF),
-    "LIGHTGREEN": color(0x55, 0xFF, 0x55),
-    "LIGHTCYAN": color(0x55, 0xFF, 0xFF),
-    "LIGHTRED": color(0xFF, 0x55, 0x55),
-    "LIGHTMAGENTA": color(0xFF, 0x55, 0xFF),
-    "YELLOW": color(0xFF, 0xFF, 0x55),
-    "WHITE": color(0xFF, 0xFF, 0xFF),
-})
 
 game = Game(display, pallette)
 
