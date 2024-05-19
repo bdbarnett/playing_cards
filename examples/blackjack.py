@@ -11,7 +11,8 @@ from playing_cards import Cards, Hand
 from time import sleep
 
 
-display_drv.rotation = 90
+if display_drv.height > display_drv.width:
+    display_drv.rotation = 90
 display = Renderer(display_drv)
 
 
