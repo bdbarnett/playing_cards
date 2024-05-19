@@ -239,7 +239,7 @@ class Cards(Pile):
         self._fcs = 6  # Face card scale
         self._width = width  # Width of card including padding
         self._height = height  # Height of card including padding
-        self._is_small = height < 120
+        self._is_small = height < 90
         self._stack_offset_x = width // 5  # Amount of space to leave between cards stacked horizontally
         self._stack_offset_y = height // 4  # Amount of space to leave between cards stacked vertically
         self._draw_width = width * 9 // 10  # Width of card excluding padding
