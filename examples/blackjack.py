@@ -134,7 +134,7 @@ class Game(Cards):
                     if self.calculate_hand_value(self.player1.in_pile) > 21:
                         self.dealer.reveal()
                         text = "Player busts! Dealer wins."
-                        self._target.btext(text, (self._target.width - self._target.bfont_width * len(text)) // 2, self._target.height // 2, self._pallette.RED)
+                        self._target.btext(text, (self._target.width - self._target.bfont_width() * len(text)) // 2, self._target.height // 2, self._pallette.RED)
                         return
                 elif choice == "stand":
                     break
@@ -162,7 +162,7 @@ class Game(Cards):
             text = "Dealer wins!"
         else:
             text = "It's a tie!"
-        self._target.btext(text, (self._target.width - self._target.bfont_width * len(text)) // 2, self._target.height // 2, self._pallette.RED)
+        self._target.btext(text, (self._target.width - self._target.bfont_width() * len(text)) // 2, self._target.height // 2, self._pallette.RED)
         print()
 
 
@@ -183,8 +183,8 @@ class Button:
         self.target.roundrect(self.x, self.y, self.width, self.height, self.radius, color, True)
         self.target.btext(
             self.text,
-            self.x + (self.target.bfont_width * len(self.text)) // 2,
-            self.y + self.target.bfont_height // 2,
+            self.x + (self.target.bfont_width() * len(self.text)) // 2,
+            self.y + self.target.bfont_height() // 2,
             self.text_color,
         )
 
