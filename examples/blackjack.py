@@ -134,8 +134,8 @@ class Game(Cards):
                     self.show()
                     if self.calculate_hand_value(self.player1.in_pile) > 21:
                         self.dealer.reveal()
-                        text = "Player busts! Dealer wins."
-                        self._target.btext(text, (self._target.width - self._target.bfont_width() * len(text)) // 2, self._target.height // 2, self._pallette.RED)
+                        text = "Player busts!\nDealer wins."
+                        self.print_message(text, self._pallette.RED)
                         return
                 elif choice == "stand":
                     break
@@ -154,17 +154,26 @@ class Game(Cards):
         print("Dealer's hand:", self.dealer.in_pile)
         print(f"{player_value=}, {dealer_value=}")
         if player_value > 21:
-            text = "Player busts! Dealer wins."
+            text = "Player busts!\nDealer wins."
         elif dealer_value > 21:
-            text = "Dealer busts! Player wins."
+            text = "Dealer busts!\nPlayer wins."
         elif player_value > dealer_value:
             text = "Player wins!"
         elif player_value < dealer_value:
             text = "Dealer wins!"
         else:
             text = "It's a tie!"
-        self._target.btext(text, (self._target.width - self._target.bfont_width() * len(text)) // 2, self._target.height // 2, self._pallette.RED)
+        self.print_message(text, self._pallette.RED)
         print()
+
+    def print_message(self, text, color):
+        self._target.btext(
+            text,
+            (self._target.width - self._target.bfont_width() * len(text.split("\n")[0])) // 2,
+            (self._target.height - self._target.bfont_height()) // 2,
+            color
+        )
+        
 
 
 class Button:
@@ -180,12 +189,13 @@ class Button:
         self.text = text
 
     def draw(self, pressed=False):
+        self.target.btext(" ", 0, 0, 0x0)  # Initialize the font so we can get the width and height
         color = self.color if not pressed else ~self.color & 0xFFFF
         self.target.roundrect(self.x, self.y, self.width, self.height, self.radius, color, True)
         self.target.btext(
             self.text,
-            self.x + (self.target.bfont_width() * len(self.text)) // 2,
-            self.y + self.target.bfont_height() // 2,
+            self.x + (self.width - self.target.bfont_width() * len(self.text)) // 2,
+            self.y + (self.height - self.target.bfont_height()) // 2,
             self.text_color,
         )
 
@@ -193,7 +203,7 @@ class Button:
         pressed = self.x <= x < self.x + self.width and self.y <= y < self.y + self.height
         if pressed:
             self.draw(True)
-            sleep(0.1)
+            sleep(0.25)
             self.draw()
         return pressed
     
