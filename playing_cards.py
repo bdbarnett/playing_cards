@@ -395,7 +395,7 @@ class Cards(Pile):
         card.set_state(target, x, y, hidden)
 
         # Draw the card background
-        target.roundrect(
+        target.round_rect(
             draw_x,
             draw_y,
             self._draw_width,
@@ -406,7 +406,7 @@ class Cards(Pile):
         )
 
         # Draw the card border
-        target.roundrect(
+        target.round_rect(
             draw_x,
             draw_y,
             self._draw_width,
@@ -418,7 +418,7 @@ class Cards(Pile):
 
         if hidden:
             # Draw the card back
-            target.roundrect(
+            target.round_rect(
                 draw_x + 2,
                 draw_y + 2,
                 self._draw_width - 4,

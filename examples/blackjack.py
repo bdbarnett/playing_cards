@@ -215,7 +215,7 @@ class Button:
             " ", 0, 0, 0x0
         )  # Initialize the font so we can get the width and height
         color = self.color if not pressed else ~self.color & 0xFFFF
-        self.target.roundrect(
+        self.target.round_rect(
             self.x, self.y, self.width, self.height, self.radius, color, True
         )
         self.target.btext(
