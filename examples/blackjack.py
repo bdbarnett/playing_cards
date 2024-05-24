@@ -12,12 +12,18 @@ from mpdisplay import Events
 from playing_cards import Cards, Hand
 from time import sleep
 
+# If byte swapping is required and the display bus is capable of having byte swapping disabled,
+# disable it and set a flag so we can swap the color bytes as they are created.
+if display_drv.requires_byte_swap:
+    needs_swap = display_drv.bus_swap_disable(True)
+else:
+    needs_swap = False
 
 if display_drv.height > display_drv.width:
     display_drv.rotation = 90
 display = DisplayBuffer(display_drv)
 
-palette = display_drv.get_palette(name="wheel")
+palette = display_drv.get_palette(name="wheel", swapped=needs_swap)
 
 # fmt: off
 VALUES = { "Ace": 11, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "10": 10, "Jack": 10, "Queen": 10, "King": 10}
@@ -166,9 +172,9 @@ class Game(Cards):
         # Determine the winner
         player_value = self.calculate_hand_value(self.player1.in_pile)
         dealer_value = self.calculate_hand_value(self.dealer.in_pile)
-        print("Player's total hand:", self.player1.in_pile)
-        print("Dealer's hand:", self.dealer.in_pile)
-        print(f"{player_value=}, {dealer_value=}")
+        # print("Player's total hand:", self.player1.in_pile)
+        # print("Dealer's hand:", self.dealer.in_pile)
+        # print(f"{player_value=}, {dealer_value=}")
         if player_value > 21:
             text = "Player busts!\nDealer wins."
         elif dealer_value > 21:
@@ -180,7 +186,7 @@ class Game(Cards):
         else:
             text = "It's a tie!"
         self.print_message(text, self._palette.RED)
-        print()
+        # print(text, "\n")
 
     def print_message(self, text, color):
         self._target.btext(
