@@ -92,25 +92,26 @@ class Card:
     def hidden(self):
         return self._hidden
 
-    @hidden.setter
-    def hidden(self, value):
-        if self._hidden != value:
-            self.render(self._target, self.position[0], self.position[1], hidden=value)
+    def update(self):
+        return self.render(self._target, self.position[0], self.position[1], self._hidden)
 
     def hide(self):
-        self.hidden = True
+        self._hidden = True
+        return self.update()
 
     def reveal(self):
-        self.hidden = False
+        self._hidden = False
+        return self.update()
 
     def flip(self):
-        self.hidden = not self.hidden
+        self._hidden = not self._hidden
+        return self.update()
 
     def discard(self):
         self._deck.discard(self)
 
     def erase(self):
-        self._deck.erase(self._target, self.position[0], self.position[1])
+        return self._deck.erase(self._target, self.position[0], self.position[1])
 
     def hit_test(self, x, y):
         if self.position is None:
@@ -129,9 +130,9 @@ class Card:
         self._position = value
 
     def render(self, target, x, y, hidden=True):
-        self._deck.render(self, target, x, y, hidden=hidden)
+        return self._deck.render(self, target, x, y, hidden=hidden)
 
-    def set_state(self, target, x, y, hidden):
+    def save_state(self, target, x, y, hidden):
         self._target = target
         self._position = (x, y)
         self._hidden = hidden
@@ -174,11 +175,12 @@ class Pile:
         else:
             hidden = self._other_cards_hidden
 
-        card.render(self._target, self._next_x, self._next_y, hidden=hidden)
+        dirty = card.render(self._target, self._next_x, self._next_y, hidden=hidden)
         if self._layout_horizontal == True:
             self._next_x += self._layout_direction * self._layout_offset
         else:
             self._next_y += self._layout_direction * self._layout_offset
+        return dirty
 
     def pull(self, card):  # Remove a card from the pile
         pass
@@ -198,10 +200,6 @@ class Hand(Pile):
     def __init__(self, is_dealer=False, **kwargs):
         self._is_dealer = is_dealer
         super().__init__(**kwargs)
-
-    def reveal(self):
-        for card in self._in_pile:
-            card.reveal()
 
 
 class Cards(Pile):
@@ -379,7 +377,7 @@ class Cards(Pile):
         draw_x = x + self._x_offset
         draw_y = y + self._y_offset
 
-        target.fill_rect(
+        return target.fill_rect(
             draw_x,
             draw_y,
             self._draw_width + 1,
@@ -392,10 +390,10 @@ class Cards(Pile):
         draw_y = y + self._y_offset
 
         # Save the state of the card
-        card.set_state(target, x, y, hidden)
+        card.save_state(target, x, y, hidden)
 
         # Draw the card background
-        target.round_rect(
+        dirty = target.round_rect(
             draw_x,
             draw_y,
             self._draw_width,
@@ -488,6 +486,8 @@ class Cards(Pile):
                 scale=self._fcs,
             )
 
+        return dirty
+
     def compare(self, card1, card2, comparison=0):
         if self._cmp_suit_order:
             if suit1_score := self._cmp_suit_order.count(card1.suit):
@@ -504,6 +504,3 @@ class Cards(Pile):
             == comparison
         )
 
-    def clear_table(self):
-        for card in self._in_play:
-            card.erase()
