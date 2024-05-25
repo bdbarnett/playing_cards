@@ -1,22 +1,24 @@
 """
-This demo is written to use either DisplayBuf or Direct Draw.  To switch between them, comment out one
-of the two import lines below.
+Playing Cards Simple Test
 """
 
-from displaybuf import DisplayBuffer
-
-# from direct_draw import Graphics as Renderer
-
 from board_config import display_drv
+from displaybuf import DisplayBuffer
 from mpdisplay import Events
 from playing_cards import Cards
 
 
+# If byte swapping is required and the display bus is capable of having byte swapping disabled,
+# disable it and set a flag so we can swap the color bytes as they are created.
+if display_drv.requires_byte_swap:
+    needs_swap = display_drv.bus_swap_disable(True)
+else:
+    needs_swap = False
+
+palette = display_drv.get_palette(name="wheel", swapped=needs_swap)
+
 display_drv.rotation = 90
 display = DisplayBuffer(display_drv)
-
-
-palette = display_drv.get_palette()
 
 table_color = palette.GREEN
 
