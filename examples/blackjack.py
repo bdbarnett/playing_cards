@@ -6,6 +6,7 @@ of the two import lines below.
 from board_config import display_drv
 from displaybuf import DisplayBuffer
 from mpdisplay import Events
+from palette import get_palette
 from playing_cards import Cards, Hand
 from time import sleep
 
@@ -17,7 +18,7 @@ if display_drv.requires_byte_swap:
 else:
     needs_swap = False
 
-palette = display_drv.get_palette(name="wheel", swapped=needs_swap)
+palette = get_palette(name="wheel", swapped=needs_swap)
 
 if display_drv.height > display_drv.width:
     display_drv.rotation = 90
