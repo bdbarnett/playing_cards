@@ -6,7 +6,7 @@ of the two import lines below.
 from board_config import display_drv
 from displaybuf import DisplayBuffer
 from mpdisplay import Events
-from palette import get_palette
+from palettes import get_palette
 from playing_cards import Cards, Hand
 from time import sleep
 
