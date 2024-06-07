@@ -428,7 +428,7 @@ class Cards(Pile):
             return
 
         # Draw the card value in the top left corner
-        target.btext(
+        target.text16(
             card.value,
             draw_x + self._x_positions[0] - len(card.value) * self._lfw // 2,
             draw_y + self._y_positions[0] - self._lfh // 2,
@@ -436,7 +436,7 @@ class Cards(Pile):
         )
 
         # Draw the card value in the bottom right corner
-        target.btext(
+        target.text16(
             card.value,
             draw_x + self._x_positions[4] - len(card.value) * self._lfw // 2,
             draw_y + self._y_positions[6] - self._lfh // 2,
@@ -445,7 +445,7 @@ class Cards(Pile):
         )
 
         # Draw the suit glyph in the top left corner
-        target.btext(
+        target.text16(
             self._suit_glyphs[card.suit],
             draw_x + self._x_positions[0] - self._sfw // 2,
             draw_y + self._y_positions[0] + self._lfh // 2,
@@ -453,7 +453,7 @@ class Cards(Pile):
         )
 
         # Draw the suit glyph in the bottom right corner
-        target.btext(
+        target.text16(
             self._suit_glyphs[card.suit],
             draw_x + self._x_positions[4] - self._sfw // 2,
             draw_y + self._y_positions[6] - self._lfh - self._sfh // 2,
@@ -467,7 +467,7 @@ class Cards(Pile):
 
         # Draw the suit glyph on the grid (on Ace through 10)
         for x_pos, y_pos in self._positions[card.rank]:
-            target.btext(
+            target.text16(
                 self._suit_glyphs[card.suit],
                 draw_x + self._x_positions[x_pos] - self._lfs * self._lfw // 2,
                 draw_y + self._y_positions[y_pos] - self._lfs * self._lfh // 2,
@@ -478,7 +478,7 @@ class Cards(Pile):
 
         # Draw a large letter on face cards instead of a graphic
         if card.rank in ["Jack", "Queen", "King"]:
-            target.btext(
+            target.text16(
                 card.value[0],
                 draw_x + self._x_positions[2] - self._fcs * self._lfw // 2,
                 draw_y + self._y_positions[3] - self._fcs * self._lfh // 2,
