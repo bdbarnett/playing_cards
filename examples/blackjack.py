@@ -4,26 +4,19 @@ of the two import lines below.
 """
 
 from board_config import display_drv
-from displaybuf import DisplayBuffer
-from mpdisplay import Events
+from displaybuf import DisplayBuffer as SSD
 from palettes import get_palette
+from mpdisplay import Events
 from playing_cards import Cards, Hand
 from time import sleep
 
 
-# If byte swapping is required and the display bus is capable of having byte swapping disabled,
-# disable it and set a flag so we can swap the color bytes as they are created.
-if display_drv.requires_byte_swap:
-    needs_swap = display_drv.bus_swap_disable(True)
-else:
-    needs_swap = False
+display_drv.rotation = 90
+ssd = SSD(display_drv, SSD.GS4_HMSB)
 
-palette = get_palette(name="wheel", swapped=needs_swap)
+palette = get_palette(color_depth=4)
+ssd.color_palette = palette
 
-if display_drv.height > display_drv.width:
-    display_drv.rotation = 90
-display = DisplayBuffer(display_drv)
-# display =display_drv
 
 # fmt: off
 VALUES = { "Ace": 11, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "10": 10, "Jack": 10, "Queen": 10, "King": 10}
@@ -181,10 +174,10 @@ class Game(Cards):
         return self.print_message(text, self._palette.RED)
 
     def print_message(self, text, color):
-        dirty = self._target.btext(
+        dirty = self._target.text16(
             text,
-            (self._target.width - self._target.bfont_width() * len(text.split("\n")[0])) // 2,
-            (self._target.height // 2) - self._target.bfont_height(),
+            (self._target.width - 8 * len(text.split("\n")[0])) // 2,
+            (self._target.height // 2) - 16,
             color,
         )
         self.show(dirty)
@@ -205,17 +198,17 @@ class Button:
         self.text(text)
 
     def draw(self, pressed=False):
-        self.target.btext(
+        self.target.text16(
             " ", 0, 0, 0x0
         )  # Initialize the font so we can get the width and height
         color = self.color if not pressed else ~self.color & 0xFFFF
         dirty = self.target.round_rect(
             self.x, self.y, self.width, self.height, self.radius, color, True
         )
-        dirty += self.target.btext(
+        dirty += self.target.text16(
             self._text,
-            self.x + (self.width - self.target.bfont_width() * len(self._text)) // 2,
-            self.y + (self.height - self.target.bfont_height()) // 2,
+            self.x + (self.width - 8 * len(self._text)) // 2,
+            self.y + (self.height - 16) // 2,
             self.text_color,
         )
         return dirty
@@ -237,4 +230,4 @@ class Button:
         return self.draw()
 
 
-game = Game(display, palette)
+game = Game(ssd, palette)
