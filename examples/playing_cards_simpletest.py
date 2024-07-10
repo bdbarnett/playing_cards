@@ -3,8 +3,8 @@ Playing Cards Simple Test
 """
 
 from board_config import display_drv
-from displaybuf import DisplayBuffer as SSD
-from palettes import get_palette
+from graphics.displaybuf import DisplayBuffer as SSD
+from graphics.palettes import get_palette
 from mpdisplay import Events
 from playing_cards import Cards
 
@@ -31,7 +31,7 @@ def deal():
     x = y = 0
     while len(cards) > 0:
         card = cards.draw_one()
-        card.render(display, x, y)
+        card.render(display_drv, x, y)
         ssd.show()
         # x += cards.stack_offset_x
         x += cards.width

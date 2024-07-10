@@ -7,6 +7,8 @@ Cards can be rendered to FrameBuf_Plus, DisplayBuffer or TFT_Graphics targets.
 """
 
 import random
+from graphics import shapes
+from graphics.binfont import text16
 
 
 HEARTS = "Hearts"
@@ -393,7 +395,8 @@ class Cards(Pile):
         card.save_state(target, x, y, hidden)
 
         # Draw the card background
-        dirty = target.round_rect(
+        dirty = shapes.round_rect(
+            target,
             draw_x,
             draw_y,
             self._draw_width,
@@ -404,7 +407,8 @@ class Cards(Pile):
         )
 
         # Draw the card border
-        target.round_rect(
+        shapes.round_rect(
+            target,
             draw_x,
             draw_y,
             self._draw_width,
@@ -416,7 +420,8 @@ class Cards(Pile):
 
         if hidden:
             # Draw the card back
-            target.round_rect(
+            shapes.round_rect(
+                target,
                 draw_x + 2,
                 draw_y + 2,
                 self._draw_width - 4,
@@ -428,7 +433,8 @@ class Cards(Pile):
             return
 
         # Draw the card value in the top left corner
-        target.text16(
+        text16(
+            target,
             card.value,
             draw_x + self._x_positions[0] - len(card.value) * self._lfw // 2,
             draw_y + self._y_positions[0] - self._lfh // 2,
@@ -436,7 +442,8 @@ class Cards(Pile):
         )
 
         # Draw the card value in the bottom right corner
-        target.text16(
+        text16(
+            target,
             card.value,
             draw_x + self._x_positions[4] - len(card.value) * self._lfw // 2,
             draw_y + self._y_positions[6] - self._lfh // 2,
@@ -445,7 +452,8 @@ class Cards(Pile):
         )
 
         # Draw the suit glyph in the top left corner
-        target.text16(
+        text16(
+            target,
             self._suit_glyphs[card.suit],
             draw_x + self._x_positions[0] - self._sfw // 2,
             draw_y + self._y_positions[0] + self._lfh // 2,
@@ -453,7 +461,8 @@ class Cards(Pile):
         )
 
         # Draw the suit glyph in the bottom right corner
-        target.text16(
+        text16(
+            target,
             self._suit_glyphs[card.suit],
             draw_x + self._x_positions[4] - self._sfw // 2,
             draw_y + self._y_positions[6] - self._lfh - self._sfh // 2,
@@ -467,7 +476,8 @@ class Cards(Pile):
 
         # Draw the suit glyph on the grid (on Ace through 10)
         for x_pos, y_pos in self._positions[card.rank]:
-            target.text16(
+            text16(
+                target,
                 self._suit_glyphs[card.suit],
                 draw_x + self._x_positions[x_pos] - self._lfs * self._lfw // 2,
                 draw_y + self._y_positions[y_pos] - self._lfs * self._lfh // 2,
@@ -478,7 +488,8 @@ class Cards(Pile):
 
         # Draw a large letter on face cards instead of a graphic
         if card.rank in ["Jack", "Queen", "King"]:
-            target.text16(
+            text16(
+                target,
                 card.value[0],
                 draw_x + self._x_positions[2] - self._fcs * self._lfw // 2,
                 draw_y + self._y_positions[3] - self._fcs * self._lfh // 2,
